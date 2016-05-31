@@ -12,7 +12,8 @@ symbol = oneOf "!$%&|*+-/:<=>?@^_~#"
 
 readExpr input = case parse parseExpr "lisp" input of
     Left err -> "No match: " ++ show err
-    Right val -> "Found value"
+    -- Right val -> "Found value"
+    Right val -> show val
 
 spaces :: Parser ()
 spaces = skipMany1 space
@@ -23,6 +24,7 @@ data LispVal = Atom String
              | Number Integer
              | String String
              | Bool Bool
+             deriving (Show)
 
 
 -- the point is that we need the escaped character. 
