@@ -3,6 +3,8 @@ import Control.Monad
 import System.Environment
 import Text.ParserCombinators.Parsec hiding (spaces)
 
+import Data.Array
+
 
 main :: IO ()
 main = do args <- getArgs
@@ -26,6 +28,7 @@ spaces = skipMany1 space
 data LispVal = Atom String
              | List [LispVal]
              | DottedList [LispVal] LispVal
+             | Vector (Array Int LispVal)
              | Number Integer
              | String String
              | Bool Bool
@@ -71,12 +74,26 @@ parseQuoted = do
     return $ List [Atom "quote", x]
 
 
+parseGeneralList :: Parser LispVal
+parseGeneralList = try parseList <|> parseDottedList
+
+
+parseVector :: Parser LispVal
+parseVector = do string "`#("
+                 List x <- parseGeneralList
+                 char ')'
+                 -- correct but verbose, use listArray to reduce zip.
+                 -- return . Vector $ array (0, length x - 1) (zip [0..] x)
+                 return . Vector $ listArray (0, length x - 1) x
+
+
 parseExpr :: Parser LispVal
 parseExpr = parseAtom
          <|> parseString
          <|> parseNumber
          <|> parseQuoted
          <|> do char '('
-                x <- try parseList <|> parseDottedList
+                x <- parseGeneralList
                 char ')'
                 return x
+         <|> parseVector
