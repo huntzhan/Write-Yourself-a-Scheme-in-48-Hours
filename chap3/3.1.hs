@@ -100,9 +100,14 @@ primitives = [("+", numericBinop (+)),
               ("mod", numericBinop mod),
               ("quotient", numericBinop quot),
               ("remainder", numericBinop rem),
-              ("symbol?", testSymbol),
-              ("string?", testString),
-              ("number?", testNumber)
+              -- ("symbol?", testSymbol),
+              -- ("string?", testString),
+              -- ("number?", testNumber)
+              ("symbol?", booleanUnaryOp testBool),
+              ("string?", booleanUnaryOp testString),
+              ("number?", booleanUnaryOp testNumber),
+              ("list?", booleanUnaryOp testList),
+              ("bool?", booleanUnaryOp testBool)
               ]
 
 numericBinop :: (Integer -> Integer -> Integer) -> [LispVal] -> LispVal
@@ -117,14 +122,35 @@ unpackNum (String n) = let parsed = reads n :: [(Integer,String)]  in
 unpackNum (List [n]) = unpackNum n
 unpackNum _ = 0
 
-testSymbol :: [LispVal] -> LispVal
-testSymbol [Atom _] = Bool True
+-- testSymbol :: [LispVal] -> LispVal
+-- testSymbol [Atom _] = Bool True
+-- testSymbol _ = Bool False
+-- 
+-- testString :: [LispVal] -> LispVal
+-- testString [String _] = Bool True
+-- testString _ = Bool False
+-- 
+-- testNumber :: [LispVal] -> LispVal
+-- testNumber [Number _] = Bool True
+-- testNumber _ = Bool False
+
+booleanUnaryOp :: (LispVal -> LispVal) -> [LispVal] -> LispVal
+booleanUnaryOp f [x] = f x
+booleanUnaryOp _ _ = Bool False
+
+testSymbol, testString, testNumber, testList, testBool :: LispVal -> LispVal
+
+testSymbol (Atom _) = Bool True
 testSymbol _ = Bool False
 
-testString :: [LispVal] -> LispVal
-testString [String _] = Bool True
+testString (String _) = Bool True
 testString _ = Bool False
 
-testNumber :: [LispVal] -> LispVal
-testNumber [Number _] = Bool True
+testNumber (Number _) = Bool True
 testNumber _ = Bool False
+
+testList (List _) = Bool True
+testList _ = Bool False
+
+testBool (Bool _) = Bool True
+testBool _ = Bool False
